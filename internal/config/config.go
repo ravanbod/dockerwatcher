@@ -1,18 +1,35 @@
 package config
 
-import "os"
+import (
+	"os"
+	"strings"
+)
 
 type (
 	Config struct {
-		RedisURL       string
-		RedisQueueName string
+		RedisURL   string
+		WatcherCfg WatcherConfig
+		NotifCfg   NotifConfig
+	}
+
+	WatcherConfig struct {
+		RedisQueueWriteName string
+	}
+
+	NotifConfig struct {
+		RedisQueueReadNames []string // comma seperated
 	}
 )
 
 func GetEnvConfig() Config {
 	return Config{
-		RedisURL:       getEnvWithDefault("REDIS_URL", "redis://localhost:6379/0?protocol=3"),
-		RedisQueueName: getEnvWithDefault("REDIS_QUEUE_NAME", "dockerwatcher"),
+		RedisURL: getEnvWithDefault("REDIS_URL", "redis://localhost:6379/0?protocol=3"),
+		WatcherCfg: WatcherConfig{
+			RedisQueueWriteName: getEnvWithDefault("REDIS_QUEUE_WRITE_NAME", "dockerwatcher"),
+		},
+		NotifCfg: NotifConfig{
+			RedisQueueReadNames: strings.Split(getEnvWithDefault("REDIS_QUEUE_READ_NAMES", "dockerwatcher,watcherdocker"), ","),
+		},
 	}
 }
 
