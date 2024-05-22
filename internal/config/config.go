@@ -10,6 +10,7 @@ type (
 		RedisURL   string
 		WatcherCfg WatcherConfig
 		NotifCfg   NotifConfig
+		AppMode    int
 	}
 
 	WatcherConfig struct {
@@ -21,7 +22,21 @@ type (
 	}
 )
 
+const (
+	WatcherApp = 1 << iota
+	NotificationApp
+)
+
 func GetEnvConfig() Config {
+	appMode := 0
+	if getEnvWithDefault("ENABLE_WATCHER", "0") == "1" || strings.ToLower(getEnvWithDefault("ENABLE_WATCHER", "0")) == "true" {
+		appMode = appMode | WatcherApp
+	}
+
+	if getEnvWithDefault("ENABLE_NOTIFICATION", "0") == "1" || strings.ToLower(getEnvWithDefault("ENABLE_NOTIFICATION", "0")) == "true" {
+		appMode = appMode | NotificationApp
+	}
+
 	return Config{
 		RedisURL: getEnvWithDefault("REDIS_URL", "redis://localhost:6379/0?protocol=3"),
 		WatcherCfg: WatcherConfig{
@@ -30,6 +45,7 @@ func GetEnvConfig() Config {
 		NotifCfg: NotifConfig{
 			RedisQueueReadNames: strings.Split(getEnvWithDefault("REDIS_QUEUE_READ_NAMES", "dockerwatcher,watcherdocker"), ","),
 		},
+		AppMode: appMode,
 	}
 }
 
