@@ -1,8 +1,11 @@
 package config
 
 import (
+	"log/slog"
 	"os"
 	"strings"
+
+	"github.com/joho/godotenv"
 )
 
 type (
@@ -28,6 +31,11 @@ const (
 )
 
 func GetEnvConfig() Config {
+	err := godotenv.Load()
+	if err != nil {
+		slog.Error("Error loading .env file", err)
+	}
+
 	appMode := 0
 	if getEnvWithDefault("ENABLE_WATCHER", "0") == "1" || strings.ToLower(getEnvWithDefault("ENABLE_WATCHER", "0")) == "true" {
 		appMode = appMode | WatcherApp
