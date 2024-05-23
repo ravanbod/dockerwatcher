@@ -4,6 +4,10 @@ import (
 	"context"
 	"log/slog"
 	"os"
+	"os/signal"
+	"strconv"
+	"syscall"
+	"time"
 
 	dockerClient "github.com/docker/docker/client"
 	"github.com/ravanbod/dockerwatcher/internal/config"
@@ -13,7 +17,9 @@ import (
 )
 
 func main() {
-	var ctx context.Context = context.Background()
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+
 	var appCfg, dockerCli, redisConn = initApp(ctx)
 
 	if appCfg.AppMode&config.WatcherApp == 1 {
@@ -23,9 +29,14 @@ func main() {
 		slog.Info("Starting Watcher service ...")
 		go watcherService.StartWatching(ctx)
 	}
-	for {
-		select {}
-	}
+	<-ctx.Done()
+
+	var timeoutDuration time.Duration = time.Second * 10
+	slog.Info("Shutting down in " + strconv.Itoa(int(timeoutDuration.Seconds())) + " seconds")
+
+	ctx, cancel := context.WithTimeout(context.Background(), timeoutDuration)
+	defer cancel()
+	<-ctx.Done()
 }
 
 func initApp(ctx context.Context) (appCfg config.Config, dockerCli *dockerClient.Client, redisConn *v9redis.Client) {
