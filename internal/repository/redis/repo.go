@@ -6,14 +6,15 @@ import (
 	v9redis "github.com/redis/go-redis/v9"
 )
 
-type redisRepo struct {
-	rclient *v9redis.Client
+type WatcherRedisRepo struct {
+	rclient   *v9redis.Client
+	queueName string
 }
 
-func NewRedisRepo(rclient *v9redis.Client) redisRepo {
-	return redisRepo{rclient: rclient}
+func NewWatcherRedisRepo(rclient *v9redis.Client, queueName string) WatcherRedisRepo {
+	return WatcherRedisRepo{rclient: rclient, queueName: queueName}
 }
 
-func (r *redisRepo) PushMessageToQueue(ctx context.Context, queueName string, data string) error {
-	return r.rclient.LPush(ctx, queueName, data).Err()
+func (r *WatcherRedisRepo) PushMessageToQueue(ctx context.Context, data string) error {
+	return r.rclient.LPush(ctx, r.queueName, data).Err()
 }
