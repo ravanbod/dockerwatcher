@@ -1,5 +1,5 @@
 package notification
 
 type NotificationSender interface {
-	SendMessage(string)
+	SendMessage(string) error
 }

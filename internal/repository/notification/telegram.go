@@ -1,6 +1,8 @@
 package notification
 
 import (
+	"log/slog"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
@@ -17,7 +19,15 @@ func NewTelegramNotificationSender(token string, charID int64) (NotificationSend
 	return telegramNotificationSender{botApi: botApi, chatID: charID}, nil
 }
 
-func (r telegramNotificationSender) SendMessage(message string) {
+func (r telegramNotificationSender) SendMessage(message string) error {
+	defer func() {
+		if r := recover(); r != nil {
+			slog.Error("Recovered error from telegram", "error", r)
+		}
+	}()
+
 	msg := tgbotapi.NewMessage(r.chatID, message)
-	r.botApi.Send(msg)
+	_, err := r.botApi.Send(msg)
+
+	return err
 }

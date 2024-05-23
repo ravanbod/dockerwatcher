@@ -7,6 +7,7 @@ import (
 
 	"github.com/ravanbod/dockerwatcher/internal/repository/notification"
 	"github.com/ravanbod/dockerwatcher/internal/repository/redis"
+	"github.com/ravanbod/dockerwatcher/pkg/jsontotree"
 )
 
 type NotificationService struct {
@@ -24,7 +25,7 @@ func (r *NotificationService) StartListening(ctx context.Context) {
 		data, err := r.redisRepo.GetLastDataWithIndex(ctx, queueIndex%r.redisRepo.QueuesSize)
 		if err == nil { // data available
 			slog.Info("Reading nth queue", "n", queueIndex%r.redisRepo.QueuesSize, "data", data)
-			r.notifRepo.SendMessage(data)
+			r.notifRepo.SendMessage(jsontotree.ConvertJsonToTree(data))
 		}
 		select {
 		case <-time.After(time.Microsecond * 100):
