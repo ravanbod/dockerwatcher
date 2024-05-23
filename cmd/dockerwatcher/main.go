@@ -20,11 +20,11 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	var appCfg, dockerCli, redisConn = initApp(ctx)
+	appCfg, dockerCli, redisConn := initApp(ctx)
 
 	if appCfg.AppMode&config.WatcherApp == 1 {
-		var redisWatcherRepo = redis.NewWatcherRedisRepo(redisConn, appCfg.WatcherCfg.RedisQueueWriteName)
-		var watcherService = service.NewWatcherService(dockerCli, redisWatcherRepo)
+		redisWatcherRepo := redis.NewWatcherRedisRepo(redisConn, appCfg.WatcherCfg.RedisQueueWriteName)
+		watcherService := service.NewWatcherService(dockerCli, redisWatcherRepo)
 
 		slog.Info("Starting Watcher service ...")
 		go watcherService.StartWatching(ctx, appCfg.WatcherCfg.EventsFilter)
@@ -39,7 +39,12 @@ func main() {
 
 func initApp(ctx context.Context) (appCfg config.Config, dockerCli *dockerClient.Client, redisConn *v9redis.Client) {
 	// Loading env vars
-	appCfg = config.GetEnvConfig()
+	appCfg, err := config.GetEnvConfig()
+	if err != nil {
+		slog.Error("Error in getting env config")
+		os.Exit(1)
+	}
+
 	if appCfg.AppMode == 0 {
 		slog.Error("You have to enable either ENABLE_WATCHER or ENABLE_NOTIFICATION")
 		os.Exit(1)
@@ -61,7 +66,7 @@ func initApp(ctx context.Context) (appCfg config.Config, dockerCli *dockerClient
 	}
 
 	// Connect to the Redis
-	redisConn, err := redis.NewRedisClient(appCfg.RedisURL)
+	redisConn, err = redis.NewRedisClient(appCfg.RedisURL)
 
 	if err != nil {
 		slog.Error("Error in parsing the redis url", "error", err)

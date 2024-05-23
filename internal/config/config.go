@@ -33,10 +33,11 @@ const (
 	NotificationApp
 )
 
-func GetEnvConfig() Config {
+func GetEnvConfig() (Config, error) {
 	err := godotenv.Load()
 	if err != nil {
 		slog.Error("Error loading .env file", "error", err)
+		return Config{}, err
 	}
 
 	appMode := 0
@@ -51,6 +52,7 @@ func GetEnvConfig() Config {
 	gracefulShutdownTimeout, err := strconv.Atoi(getEnvWithDefault("GRACEFUL_SHUTDOWN_TIMEOUT", "10"))
 	if err != nil {
 		slog.Error("Error in reading GRACEFUL_SHUTDOWN_TIMEOUT", "error", err)
+		return Config{}, err
 	}
 
 	return Config{
@@ -64,7 +66,7 @@ func GetEnvConfig() Config {
 		},
 		AppMode:                 appMode,
 		GracefulShutdownTimeout: int64(gracefulShutdownTimeout),
-	}
+	}, nil
 }
 
 func getEnvWithDefault(key string, defaultKey string) string {

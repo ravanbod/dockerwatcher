@@ -45,7 +45,7 @@ func (r *Watcher) StartWatching(ctx context.Context, eventFilters []string) {
 				slog.Error("Ignoring the message ...")
 				break
 			}
-			slog.Info("Docker event: " + string(jsonMsg))
+			slog.Info("Docker event", "event", string(jsonMsg))
 			err = r.redisRepo.PushMessageToQueue(ctx, string(jsonMsg))
 			if err != nil {
 				slog.Error("Error in pushing message to redis", "error", err)
