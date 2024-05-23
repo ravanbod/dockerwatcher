@@ -51,12 +51,12 @@ func initApp(ctx context.Context) (appCfg config.Config, dockerCli *dockerClient
 	if appCfg.AppMode&config.WatcherApp == 1 {
 		cli, err := dockerClient.NewClientWithOpts(dockerClient.FromEnv, dockerClient.WithAPIVersionNegotiation())
 		if err != nil {
-			slog.Error("Error in connecting to the docker", err)
+			slog.Error("Error in connecting to the docker", "error", err)
 			os.Exit(1)
 		}
 		_, err = cli.Ping(ctx)
 		if err != nil {
-			slog.Error("Error in connecting to the docker", err)
+			slog.Error("Error in connecting to the docker", "error", err)
 			os.Exit(1)
 		}
 		dockerCli = cli
@@ -66,12 +66,12 @@ func initApp(ctx context.Context) (appCfg config.Config, dockerCli *dockerClient
 	redisConn, err := redis.NewRedisClient(appCfg.RedisURL)
 
 	if err != nil {
-		slog.Error("Error in parsing the redis url", err)
+		slog.Error("Error in parsing the redis url", "error", err)
 		os.Exit(1)
 	}
 	err = redisConn.Ping(ctx).Err()
 	if err != nil {
-		slog.Error("Error in connecting to the redis", err)
+		slog.Error("Error in connecting to the redis", "error", err)
 		os.Exit(1)
 	}
 

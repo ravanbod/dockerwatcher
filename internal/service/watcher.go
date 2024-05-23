@@ -25,18 +25,18 @@ func (r *Watcher) StartWatching(ctx context.Context) {
 	for {
 		select {
 		case err := <-errs:
-			slog.Error("error in reading docker evenets", err)
+			slog.Error("error in reading docker evenets", "error", err)
 		case msg := <-msgs:
 			jsonMsg, err := json.Marshal(msg)
 			if err != nil {
-				slog.Error("error in converting docker event to json", err)
+				slog.Error("error in converting docker event to json", "error", err)
 				slog.Error("Ignoring the message ...")
 				break
 			}
 			slog.Info("Docker event: " + string(jsonMsg))
 			err = r.redisRepo.PushMessageToQueue(ctx, string(jsonMsg))
 			if err != nil {
-				slog.Error("Error in pushing message to redis", err)
+				slog.Error("Error in pushing message to redis", "error", err)
 			}
 		case <-ctx.Done():
 			slog.Info("Exiting Watcher service ...")

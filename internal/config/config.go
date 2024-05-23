@@ -33,7 +33,7 @@ const (
 func GetEnvConfig() Config {
 	err := godotenv.Load()
 	if err != nil {
-		slog.Error("Error loading .env file", err)
+		slog.Error("Error loading .env file", "error", err)
 	}
 
 	appMode := 0
