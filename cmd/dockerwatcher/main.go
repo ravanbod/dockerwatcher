@@ -31,10 +31,8 @@ func main() {
 	}
 	<-ctx.Done()
 
-	var timeoutDuration time.Duration = time.Second * 10
-	slog.Info("Shutting down in " + strconv.Itoa(int(timeoutDuration.Seconds())) + " seconds")
-
-	ctx, cancel := context.WithTimeout(context.Background(), timeoutDuration)
+	slog.Info("Shutting down in " + strconv.Itoa(int(appCfg.GracefulShutdownTimeout)) + " seconds")
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(appCfg.GracefulShutdownTimeout)*time.Second)
 	defer cancel()
 	<-ctx.Done()
 }

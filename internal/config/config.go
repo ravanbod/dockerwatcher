@@ -3,6 +3,7 @@ package config
 import (
 	"log/slog"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/joho/godotenv"
@@ -10,10 +11,11 @@ import (
 
 type (
 	Config struct {
-		RedisURL   string
-		WatcherCfg WatcherConfig
-		NotifCfg   NotifConfig
-		AppMode    int
+		RedisURL                string
+		WatcherCfg              WatcherConfig
+		NotifCfg                NotifConfig
+		AppMode                 int
+		GracefulShutdownTimeout int64
 	}
 
 	WatcherConfig struct {
@@ -46,6 +48,11 @@ func GetEnvConfig() Config {
 		appMode = appMode | NotificationApp
 	}
 
+	gracefulShutdownTimeout, err := strconv.Atoi(getEnvWithDefault("GRACEFUL_SHUTDOWN_TIMEOUT", "10"))
+	if err != nil {
+		slog.Error("Error in reading GRACEFUL_SHUTDOWN_TIMEOUT", "error", err)
+	}
+
 	return Config{
 		RedisURL: getEnvWithDefault("REDIS_URL", "redis://localhost:6379/0?protocol=3"),
 		WatcherCfg: WatcherConfig{
@@ -55,7 +62,8 @@ func GetEnvConfig() Config {
 		NotifCfg: NotifConfig{
 			RedisQueueReadNames: strings.Split(getEnvWithDefault("REDIS_QUEUE_READ_NAMES", "dockerwatcher,watcherdocker"), ","),
 		},
-		AppMode: appMode,
+		AppMode:                 appMode,
+		GracefulShutdownTimeout: int64(gracefulShutdownTimeout),
 	}
 }
 
