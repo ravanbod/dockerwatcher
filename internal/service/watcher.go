@@ -11,18 +11,17 @@ import (
 )
 
 type Watcher struct {
-	ctx       context.Context
 	dockerCli *dockerClient.Client
 	redisRepo redis.WatcherRedisRepo
 }
 
-func NewWatcherService(ctx context.Context, dockerCli *dockerClient.Client, redisRepo redis.WatcherRedisRepo) Watcher {
-	return Watcher{ctx: ctx, dockerCli: dockerCli, redisRepo: redisRepo}
+func NewWatcherService(dockerCli *dockerClient.Client, redisRepo redis.WatcherRedisRepo) Watcher {
+	return Watcher{dockerCli: dockerCli, redisRepo: redisRepo}
 }
 
 // Blocking function! run it as a goroutine
-func (r *Watcher) StartWatching() {
-	msgs, errs := r.dockerCli.Events(r.ctx, types.EventsOptions{})
+func (r *Watcher) StartWatching(ctx context.Context) {
+	msgs, errs := r.dockerCli.Events(ctx, types.EventsOptions{})
 	for {
 		select {
 		case err := <-errs:
@@ -35,11 +34,11 @@ func (r *Watcher) StartWatching() {
 				break
 			}
 			slog.Info("Docker event: " + string(jsonMsg))
-			err = r.redisRepo.PushMessageToQueue(r.ctx, string(jsonMsg))
+			err = r.redisRepo.PushMessageToQueue(ctx, string(jsonMsg))
 			if err != nil {
 				slog.Error("Error in pushing message to redis", err)
 			}
-		case <-r.ctx.Done():
+		case <-ctx.Done():
 			slog.Info("Exiting Watcher service ...")
 			return
 		}

@@ -18,10 +18,10 @@ func main() {
 
 	if appCfg.AppMode&config.WatcherApp == 1 {
 		var redisWatcherRepo = redis.NewWatcherRedisRepo(redisConn, appCfg.WatcherCfg.RedisQueueWriteName)
-		var watcherService = service.NewWatcherService(ctx, dockerCli, redisWatcherRepo)
+		var watcherService = service.NewWatcherService(dockerCli, redisWatcherRepo)
 
 		slog.Info("Starting Watcher service ...")
-		go watcherService.StartWatching()
+		go watcherService.StartWatching(ctx)
 	}
 	for {
 		select {}
