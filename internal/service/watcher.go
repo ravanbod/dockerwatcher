@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"log/slog"
+	"strings"
 
 	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/filters"
 	dockerClient "github.com/docker/docker/client"
 	"github.com/ravanbod/dockerwatcher/internal/repository/redis"
 )
@@ -20,8 +22,18 @@ func NewWatcherService(dockerCli *dockerClient.Client, redisRepo redis.WatcherRe
 }
 
 // Blocking function! run it as a goroutine
-func (r *Watcher) StartWatching(ctx context.Context) {
-	msgs, errs := r.dockerCli.Events(ctx, types.EventsOptions{})
+func (r *Watcher) StartWatching(ctx context.Context, eventFilters []string) {
+	filterArgs := filters.NewArgs()
+	for _, eventFilter := range eventFilters {
+		if eventFilter == "" {
+			break
+		}
+		slog.Info("Added filter", "filter", eventFilter)
+		splited := strings.Split(eventFilter, "=")
+		filterArgs.Add(splited[0], splited[1])
+	}
+
+	msgs, errs := r.dockerCli.Events(ctx, types.EventsOptions{Filters: filterArgs})
 	for {
 		select {
 		case err := <-errs:

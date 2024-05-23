@@ -27,7 +27,7 @@ func main() {
 		var watcherService = service.NewWatcherService(dockerCli, redisWatcherRepo)
 
 		slog.Info("Starting Watcher service ...")
-		go watcherService.StartWatching(ctx)
+		go watcherService.StartWatching(ctx, appCfg.WatcherCfg.EventsFilter)
 	}
 	<-ctx.Done()
 

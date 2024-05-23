@@ -18,6 +18,7 @@ type (
 
 	WatcherConfig struct {
 		RedisQueueWriteName string
+		EventsFilter        []string // comma seperated
 	}
 
 	NotifConfig struct {
@@ -49,6 +50,7 @@ func GetEnvConfig() Config {
 		RedisURL: getEnvWithDefault("REDIS_URL", "redis://localhost:6379/0?protocol=3"),
 		WatcherCfg: WatcherConfig{
 			RedisQueueWriteName: getEnvWithDefault("REDIS_QUEUE_WRITE_NAME", "dockerwatcher"),
+			EventsFilter:        strings.Split(getEnvWithDefault("EVENTS_FILTER", ""), ","),
 		},
 		NotifCfg: NotifConfig{
 			RedisQueueReadNames: strings.Split(getEnvWithDefault("REDIS_QUEUE_READ_NAMES", "dockerwatcher,watcherdocker"), ","),
