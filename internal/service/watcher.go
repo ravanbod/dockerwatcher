@@ -12,17 +12,17 @@ import (
 	"github.com/ravanbod/dockerwatcher/internal/repository/redis"
 )
 
-type Watcher struct {
+type WatcherService struct {
 	dockerCli *dockerClient.Client
 	redisRepo redis.WatcherRedisRepo
 }
 
-func NewWatcherService(dockerCli *dockerClient.Client, redisRepo redis.WatcherRedisRepo) Watcher {
-	return Watcher{dockerCli: dockerCli, redisRepo: redisRepo}
+func NewWatcherService(dockerCli *dockerClient.Client, redisRepo redis.WatcherRedisRepo) WatcherService {
+	return WatcherService{dockerCli: dockerCli, redisRepo: redisRepo}
 }
 
 // Blocking function! run it as a goroutine
-func (r *Watcher) StartWatching(ctx context.Context, eventFilters []string) {
+func (r *WatcherService) StartWatching(ctx context.Context, eventFilters []string) {
 	filterArgs := filters.NewArgs()
 	for _, eventFilter := range eventFilters {
 		if eventFilter == "" {

@@ -24,7 +24,14 @@ type (
 	}
 
 	NotifConfig struct {
-		RedisQueueReadNames []string // comma seperated
+		RedisQueueReadNames  []string // comma seperated
+		NotificationPlatform string
+		TelegramConfig       TelegramConfig
+	}
+
+	TelegramConfig struct {
+		TelegramBotApiToken string
+		TelegramChatID      int64
 	}
 )
 
@@ -55,6 +62,15 @@ func GetEnvConfig() (Config, error) {
 		return Config{}, err
 	}
 
+	telegramChatID := 0
+	if getEnvWithDefault("NOTIFICATION_PLATFORM", "telegram") == "telegram" {
+		telegramChatID, err = strconv.Atoi(getEnvWithDefault("TELEGRAM_CHAT_ID", "0"))
+		if err != nil {
+			slog.Error("Error in reading TELEGRAM_CHAT_ID", "error", err)
+			return Config{}, err
+		}
+	}
+
 	return Config{
 		RedisURL: getEnvWithDefault("REDIS_URL", "redis://localhost:6379/0?protocol=3"),
 		WatcherCfg: WatcherConfig{
@@ -62,7 +78,9 @@ func GetEnvConfig() (Config, error) {
 			EventsFilter:        strings.Split(getEnvWithDefault("EVENTS_FILTER", ""), ","),
 		},
 		NotifCfg: NotifConfig{
-			RedisQueueReadNames: strings.Split(getEnvWithDefault("REDIS_QUEUE_READ_NAMES", "dockerwatcher,watcherdocker"), ","),
+			RedisQueueReadNames:  strings.Split(getEnvWithDefault("REDIS_QUEUE_READ_NAMES", "dockerwatcher,watcherdocker"), ","),
+			NotificationPlatform: getEnvWithDefault("NOTIFICATION_PLATFORM", "telegram"),
+			TelegramConfig:       TelegramConfig{TelegramBotApiToken: getEnvWithDefault("TELEGRAM_BOT_API_TOKEN", "xxxx"), TelegramChatID: int64(telegramChatID)},
 		},
 		AppMode:                 appMode,
 		GracefulShutdownTimeout: int64(gracefulShutdownTimeout),

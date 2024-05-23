@@ -11,6 +11,7 @@ import (
 
 	dockerClient "github.com/docker/docker/client"
 	"github.com/ravanbod/dockerwatcher/internal/config"
+	"github.com/ravanbod/dockerwatcher/internal/repository/notification"
 	"github.com/ravanbod/dockerwatcher/internal/repository/redis"
 	"github.com/ravanbod/dockerwatcher/internal/service"
 	v9redis "github.com/redis/go-redis/v9"
@@ -22,13 +23,26 @@ func main() {
 
 	appCfg, dockerCli, redisConn := initApp(ctx)
 
-	if appCfg.AppMode&config.WatcherApp == 1 {
+	if appCfg.AppMode&config.WatcherApp != 0 {
 		redisWatcherRepo := redis.NewWatcherRedisRepo(redisConn, appCfg.WatcherCfg.RedisQueueWriteName)
 		watcherService := service.NewWatcherService(dockerCli, redisWatcherRepo)
 
 		slog.Info("Starting Watcher service ...")
 		go watcherService.StartWatching(ctx, appCfg.WatcherCfg.EventsFilter)
 	}
+
+	if appCfg.AppMode&config.NotificationApp != 0 {
+		redisNotificationRepo := redis.NewNotificationRedisRepo(redisConn, appCfg.NotifCfg.RedisQueueReadNames)
+		telegramNotif, err := notification.NewTelegramNotificationSender(appCfg.NotifCfg.TelegramConfig.TelegramBotApiToken, appCfg.NotifCfg.TelegramConfig.TelegramChatID)
+		if err != nil {
+			slog.Error("Error in creating telegram api", "error", err)
+		}
+
+		notificationService := service.NewNotificationService(redisNotificationRepo, telegramNotif)
+		slog.Info("Starting Notification service ...")
+		go notificationService.StartListening(ctx)
+	}
+
 	<-ctx.Done()
 
 	slog.Info("Shutting down in " + strconv.Itoa(int(appCfg.GracefulShutdownTimeout)) + " seconds")
