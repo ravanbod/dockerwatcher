@@ -22,13 +22,20 @@ func NewNotificationService(redisRepo redis.NotificationRedisRepo, notifRepo not
 func (r *NotificationService) StartListening(ctx context.Context) {
 	queueIndex := uint(0)
 	for {
-		data, err := r.redisRepo.GetLastDataWithIndex(ctx, queueIndex%r.redisRepo.QueuesSize)
+		qi := queueIndex % r.redisRepo.QueuesSize
+
+		data, err := r.redisRepo.GetLastDataWithIndex(ctx, qi)
 		if err == nil { // data available
-			slog.Info("Reading nth queue", "n", queueIndex%r.redisRepo.QueuesSize, "data", data)
-			r.notifRepo.SendMessage(jsontotree.ConvertJsonToTree(data))
+			slog.Info("Reading nth queue", "n", qi, "data", data)
+			err := r.notifRepo.SendMessage(jsontotree.ConvertJsonToTree(data))
+			if err != nil { // Error in sending message to telegram ... resend message to redis
+				slog.Error("Error in sending message to telegram", "error", err)
+				slog.Info("Resending the message to redis", "message", data)
+				r.redisRepo.PushMessageToQueue(ctx, qi, data)
+			}
 		}
 		select {
-		case <-time.After(time.Microsecond * 100):
+		case <-time.After(time.Microsecond * 1000):
 			queueIndex++
 		case <-ctx.Done():
 			slog.Info("Exiting Notification service ...")

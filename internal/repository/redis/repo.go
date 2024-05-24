@@ -41,3 +41,7 @@ func (r *NotificationRedisRepo) GetLastDataWithIndex(ctx context.Context, i uint
 	}
 	return data, nil
 }
+
+func (r *NotificationRedisRepo) PushMessageToQueue(ctx context.Context, i uint, data string) error {
+	return r.rclient.LPush(ctx, r.queueNames[i], data).Err()
+}

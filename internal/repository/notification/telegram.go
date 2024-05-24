@@ -1,33 +1,35 @@
 package notification
 
 import (
+	"bytes"
+	"fmt"
+	"io"
 	"log/slog"
-
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"net/http"
 )
 
 type telegramNotificationSender struct {
-	botApi *tgbotapi.BotAPI
-	chatID int64
+	botToken string
+	chatID   int64
 }
 
 func NewTelegramNotificationSender(token string, charID int64) (NotificationSender, error) {
-	botApi, err := tgbotapi.NewBotAPI(token)
-	if err != nil {
-		return telegramNotificationSender{}, err
-	}
-	return telegramNotificationSender{botApi: botApi, chatID: charID}, nil
+	return telegramNotificationSender{botToken: token, chatID: charID}, nil
 }
 
 func (r telegramNotificationSender) SendMessage(message string) error {
-	defer func() {
-		if r := recover(); r != nil {
-			slog.Error("Recovered error from telegram", "error", r)
+	url := fmt.Sprintf("https://api.telegram.org/bot%s/%s", r.botToken, "sendMessage")
+	text := fmt.Sprintf("{\"chat_id\":%d, \"text\":\"%s\"}", r.chatID, message)
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer([]byte(text)))
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode != 200 {
+		respBody, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return err
 		}
-	}()
-
-	msg := tgbotapi.NewMessage(r.chatID, message)
-	_, err := r.botApi.Send(msg)
-
+		slog.Error("Error from telegram", "error", respBody)
+	}
 	return err
 }
