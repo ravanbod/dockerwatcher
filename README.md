@@ -67,13 +67,28 @@ To build DockerWatcher from source, follow these steps:
     go build -o dockerwatcher cmd/dockerwatcher/main.go
     ```
 
-### How to run
+### Build with Docker
+
+To build DockerWatcher with docker, follow these steps:
+
+1. **Clone the Repository:**
+    ```sh
+    git clone https://github.com/ravanbod/dockerwatcher.git
+    cd dockerwatcher
+    ```
+
+2. **Build the Project:**
+    ```sh
+    docker build -t dockerwatcher .
+    ```
+
+## How to run
+
+### Environment Variables
 
 please see `.env.example` file. create another file like this and name it `.env`.
 
 Also you can export these variables in the shell you use.
-
-## Environment Variables
 
 | Key                      | Description               | Optional/Required |
 |--------------------------|---------------------------|-------------------|
@@ -94,3 +109,28 @@ Also you can export these variables in the shell you use.
 
 for `EVENTS_FILTER`, see [this link](https://docs.docker.com/reference/cli/docker/system/events/#filter).
 
+### Run without docker
+
+To run the project without docker, You can simply run this command (after Build from source code).
+
+```
+./dockerwatcher
+```
+
+### Run with docker
+
+To run the project with docker, You can simply run this command (after Build with docker).
+
+```
+docker run --name dockerwatcher -it -v $(pwd)/.env:/app/.env -v /var/run/docker.sock:/var/run/docker.sock --network dockerwatcher dockerwatcher
+```
+
+A redis has to be in `dockerwatcher` network.
+
+### Run with docker-compose (Recommended)
+
+If you have an existing redis, you can use `docker-compose.yml`. else you can use `docker-compose-full.yml` that has redis and DockerWatcher.
+
+#### Run multiple instances
+
+It is recommended that launch a watcher service in every docker engine and use a shared Redis between them. And launch a Notification instance that sends Redis messages to your notification platform.
