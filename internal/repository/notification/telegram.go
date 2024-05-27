@@ -2,6 +2,7 @@ package notification
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -30,6 +31,7 @@ func (r telegramNotificationSender) SendMessage(message string) error {
 			return err
 		}
 		slog.Error("Error from telegram", "error", respBody)
+		return errors.New("STATUS CODE IS NOT 200")
 	}
 	return err
 }
