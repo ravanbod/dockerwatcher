@@ -92,22 +92,24 @@ Also you can export these variables in the shell you use.
 
 | Key                      | Description               | Optional/Required |
 |--------------------------|---------------------------|-------------------|
-| REDIS_URL                |                           | Required          |
-| REDIS_QUEUE_WRITE_NAME   |                           | Required          |
-| REDIS_QUEUE_READ_NAMES   |                           | Required          |
-| ENABLE_WATCHER           | 0 (disabled), 1 (enabled) | Required          |
-| ENABLE_NOTIFICATION      | 0 (disabled), 1 (enabled) | Required          |
-| GRACEFUL_SHUTDOWN_TIMEOUT| Integer (seconds)         | Required          |
-| EVENTS_FILTER            |                           | Optional          |
-| NOTIFICATION_PLATFORM    | generic                   | Required          |
-| TELEGRAM_BOT_API_TOKEN   |                           | Required          |
-| TELEGRAM_CHAT_ID         |                           | Required          |
-| GENERIC_NOTIFICATION_URL | http://localhost:80/webhook Required          |
-| MATTERMOST_HOST          | https://mattermost.local  | Required          |
-| MATTERMOST_BEARER_AUTH   | xxxx                      | Required          |
-| MATTERMOST_CHANNEL_ID    | xxxx                      | Required          |
+| REDIS_URL                |                           | Required                 |
+| REDIS_QUEUE_WRITE_NAME   |                           | Required                 |
+| REDIS_QUEUE_READ_NAMES   |                           | Required                 |
+| ENABLE_WATCHER           | 0 (disabled), 1 (enabled) | Required                 |
+| ENABLE_NOTIFICATION      | 0 (disabled), 1 (enabled) | Required                 |
+| GRACEFUL_SHUTDOWN_TIMEOUT| Integer (seconds)         | Required                 |
+| EVENTS_FILTER            |                           | Optional                 |
+| NOTIFICATION_PLATFORM    |generic,telegram,mattermost| Required                 |
+| TELEGRAM_BOT_API_TOKEN   |                           | Required if np=telegram  |
+| TELEGRAM_CHAT_ID         |                           | Required if np=telegram  |
+| GENERIC_NOTIFICATION_URL |                           | Required if np=generic   |
+| MATTERMOST_HOST          |                           | Required if np=mattermost|
+| MATTERMOST_BEARER_AUTH   |                           | Required if np=mattermost|
+| MATTERMOST_CHANNEL_ID    |                           | Required if np=mattermost|
 
+*np = NOTIFICATION_PLATFORM
 
+for example, if you want to set NOTIFICATION_PLATFORM=telegram, TELEGRAM_BOT_API_TOKEN and TELEGRAM_CHAT_ID are necessary.
 
 `REDIS_QUEUE_READ_NAMES` and `EVENTS_FILTER` are comma seperated. watch `.env.example`.
 
