@@ -64,7 +64,7 @@ func initApp(ctx context.Context) (appCfg config.Config, dockerCli *dockerClient
 	// Loading env vars
 	appCfg, err := config.GetEnvConfig()
 	if err != nil {
-		slog.Error("Error in getting env config")
+		slog.Error("Error in getting env config", "error", err)
 		os.Exit(1)
 	}
 
