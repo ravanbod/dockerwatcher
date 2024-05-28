@@ -42,7 +42,7 @@ By using lists in Redis, DockerWatcher creates queues of messages, ensuring effi
 ### Notification Platforms
 
 - [x] Telegram
-- [ ] Skype
+- [x] Generic webhook
 - [ ] Slack
 - [ ] Mattermost
 
@@ -102,6 +102,7 @@ Also you can export these variables in the shell you use.
 | NOTIFICATION_PLATFORM    | telegram                  | Required          |
 | TELEGRAM_BOT_API_TOKEN   |                           | Required          |
 | TELEGRAM_CHAT_ID         |                           | Required          |
+| GENERIC_NOTIFICATION_URL | http://localhost:80/webhook Required          |
 
 
 

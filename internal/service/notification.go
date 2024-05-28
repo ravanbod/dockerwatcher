@@ -28,8 +28,8 @@ func (r *NotificationService) StartListening(ctx context.Context) {
 		if err == nil { // data available
 			slog.Info("Reading nth queue", "n", qi, "data", data)
 			err := r.notifRepo.SendMessage(jsontotree.ConvertJsonToTree(data))
-			if err != nil { // Error in sending message to telegram ... resend message to redis
-				slog.Error("Error in sending message to telegram", "error", err)
+			if err != nil { // Error in sending message to notification platform ... resend the message to redis
+				slog.Error("Error in sending message to notification platform", "error", err)
 				slog.Info("Resending the message to redis", "message", data)
 				r.redisRepo.PushMessageToQueue(ctx, qi, data)
 			}

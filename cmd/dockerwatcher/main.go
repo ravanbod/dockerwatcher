@@ -33,12 +33,21 @@ func main() {
 
 	if appCfg.AppMode&config.NotificationApp != 0 {
 		redisNotificationRepo := redis.NewNotificationRedisRepo(redisConn, appCfg.NotifCfg.RedisQueueReadNames)
-		telegramNotif, err := notification.NewTelegramNotificationSender(appCfg.NotifCfg.TelegramConfig.TelegramBotApiToken, appCfg.NotifCfg.TelegramConfig.TelegramChatID)
-		if err != nil {
-			slog.Error("Error in creating telegram api", "error", err)
-		}
 
-		notificationService := service.NewNotificationService(redisNotificationRepo, telegramNotif)
+		var notifRepo notification.NotificationSender
+		var notifErr error
+
+		if appCfg.NotifCfg.NotificationPlatform == "telegram" {
+			slog.Info("Preparing Telegram Notification Service")
+			notifRepo, notifErr = notification.NewTelegramNotificationSender(appCfg.NotifCfg.TelegramConfig.TelegramBotApiToken, appCfg.NotifCfg.TelegramConfig.TelegramChatID)
+			if notifErr != nil {
+				slog.Error("Error in creating telegram api", "error", notifErr)
+			}
+		} else if appCfg.NotifCfg.NotificationPlatform == "generic" {
+			slog.Info("Preparing Generic Notification Service")
+			notifRepo, _ = notification.NewGenericNotificationSender(appCfg.NotifCfg.GenericNotifConfig.Url) // error always is nil
+		}
+		notificationService := service.NewNotificationService(redisNotificationRepo, notifRepo)
 		slog.Info("Starting Notification service ...")
 		go notificationService.StartListening(ctx)
 	}

@@ -1,7 +1,9 @@
 package config
 
 import (
+	"errors"
 	"log/slog"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -27,11 +29,16 @@ type (
 		RedisQueueReadNames  []string // comma seperated
 		NotificationPlatform string
 		TelegramConfig       TelegramConfig
+		GenericNotifConfig   GenericNotifConfig
 	}
 
 	TelegramConfig struct {
 		TelegramBotApiToken string
 		TelegramChatID      int64
+	}
+
+	GenericNotifConfig struct {
+		Url string
 	}
 )
 
@@ -62,12 +69,23 @@ func GetEnvConfig() (Config, error) {
 	}
 
 	telegramChatID := 0
+	genericNotifUrl := ""
 	if getEnvWithDefault("NOTIFICATION_PLATFORM", "telegram") == "telegram" {
 		telegramChatID, err = strconv.Atoi(getEnvWithDefault("TELEGRAM_CHAT_ID", "0"))
 		if err != nil {
 			slog.Error("Error in reading TELEGRAM_CHAT_ID", "error", err)
 			return Config{}, err
 		}
+	} else if getEnvWithDefault("NOTIFICATION_PLATFORM", "generic") == "generic" {
+		genericNotifUrl = getEnvWithDefault("GENERIC_NOTIFICATION_URL", "http://localhost:80/webhook")
+		_, err := url.ParseRequestURI(genericNotifUrl)
+		if err != nil {
+			slog.Error("Invalid URL", "error", err, "url", genericNotifUrl)
+			return Config{}, err
+		}
+	} else {
+		slog.Error("Error in reading NOTIFICATION_PLATFORM", "error", err)
+		return Config{}, errors.New("NOTIFICATION_PLATFORM must be set")
 	}
 
 	return Config{
@@ -80,6 +98,7 @@ func GetEnvConfig() (Config, error) {
 			RedisQueueReadNames:  strings.Split(getEnvWithDefault("REDIS_QUEUE_READ_NAMES", "dockerwatcher,watcherdocker"), ","),
 			NotificationPlatform: getEnvWithDefault("NOTIFICATION_PLATFORM", "telegram"),
 			TelegramConfig:       TelegramConfig{TelegramBotApiToken: getEnvWithDefault("TELEGRAM_BOT_API_TOKEN", "xxxx"), TelegramChatID: int64(telegramChatID)},
+			GenericNotifConfig:   GenericNotifConfig{Url: genericNotifUrl},
 		},
 		AppMode:                 appMode,
 		GracefulShutdownTimeout: int64(gracefulShutdownTimeout),
