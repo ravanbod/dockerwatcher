@@ -140,3 +140,23 @@ If you have an existing redis, you can use `docker-compose.yml`. else you can us
 #### Run multiple instances
 
 It is recommended that launch a watcher service in every docker engine and use a shared Redis between them. And launch a Notification instance that sends Redis messages to your notification platform.
+
+## Messages
+You will get the messages in the markdown format. this is an example of dying mysql container.
+```
+# Docker Event 
+
+ ## Event Details 
+
+- **Type**: `container`
+- **Action**: `die`
+- **Scope**: `local`
+- **Time**: `1716908784`
+- **TimeNano**: `1716908784342468156`
+## Actor 
+- **Actor.ID**: `ab1bec9756b03eb3c12c42fe08496a94d73b037c8e60e41344ae869fd41e38cb`
+  - **name**: `mysql`
+  - **execDuration**: `5`
+  - **exitCode**: `0`
+  - **image**: `mysql`
+```
