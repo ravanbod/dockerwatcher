@@ -35,17 +35,16 @@ func main() {
 		redisNotificationRepo := redis.NewNotificationRedisRepo(redisConn, appCfg.NotifCfg.RedisQueueReadNames)
 
 		var notifRepo notification.NotificationSender
-		var notifErr error
 
-		if appCfg.NotifCfg.NotificationPlatform == "telegram" {
-			slog.Info("Preparing Telegram Notification Service")
-			notifRepo, notifErr = notification.NewTelegramNotificationSender(appCfg.NotifCfg.TelegramConfig.TelegramBotApiToken, appCfg.NotifCfg.TelegramConfig.TelegramChatID)
-			if notifErr != nil {
-				slog.Error("Error in creating telegram api", "error", notifErr)
-			}
-		} else if appCfg.NotifCfg.NotificationPlatform == "generic" {
+		if appCfg.NotifCfg.NotificationPlatform == "generic" {
 			slog.Info("Preparing Generic Notification Service")
 			notifRepo, _ = notification.NewGenericNotificationSender(appCfg.NotifCfg.GenericNotifConfig.Url) // error always is nil
+		} else if appCfg.NotifCfg.NotificationPlatform == "telegram" {
+			slog.Info("Preparing Telegram Notification Service")
+			notifRepo, _ = notification.NewTelegramNotificationSender(appCfg.NotifCfg.TelegramConfig.TelegramBotApiToken, appCfg.NotifCfg.TelegramConfig.TelegramChatID)
+		} else if appCfg.NotifCfg.NotificationPlatform == "mattermost" {
+			slog.Info("Preparing Mattermost Notification Service")
+			notifRepo, _ = notification.NewMattermostNotificationSender(appCfg.NotifCfg.MattermostConfig.Host, appCfg.NotifCfg.MattermostConfig.BearerAuth, appCfg.NotifCfg.MattermostConfig.ChannelId)
 		}
 		notificationService := service.NewNotificationService(redisNotificationRepo, notifRepo)
 		slog.Info("Starting Notification service ...")

@@ -5,7 +5,7 @@
 ### Key Features
 
 - **Event Monitoring:** Capture and filter events from Docker's event system.
-- **Multi-Platform Notifications:** Receive alerts on your preferred communication platforms, including Telegram (Supported), Discord (Soon), Skype (Soon), and more (Soon).
+- **Multi-Platform Notifications:** Receive alerts on your preferred communication platforms, including Telegram (Supported), Mattermost (Supported), Generic webhook (Soon) and more (Soon).
 - **Scalable Architecture:** Designed with a modular approach to efficiently handle and process event data.
 - **Written in Go:** Utilizes the powerful and efficient Go programming language for high performance and reliability.
 
@@ -43,8 +43,8 @@ By using lists in Redis, DockerWatcher creates queues of messages, ensuring effi
 
 - [x] Telegram
 - [x] Generic webhook
-- [ ] Slack
-- [ ] Mattermost
+- [x] Mattermost
+
 
 ### Motivation
 
@@ -99,10 +99,13 @@ Also you can export these variables in the shell you use.
 | ENABLE_NOTIFICATION      | 0 (disabled), 1 (enabled) | Required          |
 | GRACEFUL_SHUTDOWN_TIMEOUT| Integer (seconds)         | Required          |
 | EVENTS_FILTER            |                           | Optional          |
-| NOTIFICATION_PLATFORM    | telegram                  | Required          |
+| NOTIFICATION_PLATFORM    | generic                   | Required          |
 | TELEGRAM_BOT_API_TOKEN   |                           | Required          |
 | TELEGRAM_CHAT_ID         |                           | Required          |
 | GENERIC_NOTIFICATION_URL | http://localhost:80/webhook Required          |
+| MATTERMOST_HOST          | https://mattermost.local  | Required          |
+| MATTERMOST_BEARER_AUTH   | xxxx                      | Required          |
+| MATTERMOST_CHANNEL_ID    | xxxx                      | Required          |
 
 
 

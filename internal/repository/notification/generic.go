@@ -3,7 +3,9 @@ package notification
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"net/http"
+	"strconv"
 )
 
 type genericNotificationSender struct {
@@ -21,6 +23,9 @@ func (r genericNotificationSender) SendMessage(message string) error {
 	if err != nil {
 		return err
 	}
-	_, err = http.Post(r.url, "application/json", bytes.NewBuffer(jsonByte))
+	res, err := http.Post(r.url, "application/json", bytes.NewBuffer(jsonByte))
+	if res.StatusCode >= 400 {
+		err = errors.New("Status code is more than 399 error=" + strconv.Itoa(res.StatusCode))
+	}
 	return err
 }
