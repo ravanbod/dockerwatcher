@@ -1,4 +1,4 @@
-# dackerwatcher in Watcher and Notification Mode + redis
+# dockerwatcher in Watcher and Notification Mode + redis
 
 version: "3"
 services:
