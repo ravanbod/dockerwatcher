@@ -95,7 +95,7 @@ func GetEnvConfig() (Config, error) {
 			return Config{}, err
 		}
 	} else if getEnvWithDefault("NOTIFICATION_PLATFORM", "generic") == "mattermost" {
-		mattermostHost = getEnvWithDefault("MATTERMOST_HOST", "http://localhost:80/webhook")
+		mattermostHost = getEnvWithDefault("MATTERMOST_HOST", "https://mattermost.local")
 		_, err := url.ParseRequestURI(mattermostHost)
 		if err != nil {
 			slog.Error("Invalid URL", "error", err, "url", mattermostHost)
