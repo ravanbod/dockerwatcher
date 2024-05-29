@@ -8,21 +8,9 @@ import (
 	"github.com/docker/docker/api/types/events"
 )
 
-type message struct { // we have to convert docker messages to this
-	Type   events.Type
-	Action events.Action
-	Actor  events.Actor
-	// Engine events are local scope. Cluster events are swarm scope.
-	Scope string
-
-	Time     int64
-	TimeNano int64
-}
-
 func ConvertJsonToMD(jsonData string) (string, error) {
 	result := "# Docker Event \n\n ## Event Details \n\n"
-
-	var dockerMsg message
+	var dockerMsg events.Message
 	err := json.Unmarshal([]byte(jsonData), &dockerMsg)
 	if err != nil {
 		slog.Error("Error in unmarshaling the message in the redis", "error", err)
