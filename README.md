@@ -1,6 +1,6 @@
-## DockerWatcher
+## Docker Watcher
 
-**DockerWatcher** is a monitoring solution written in Go, designed to track Docker events and notify system administrators in real-time. By leveraging Docker's event system, DockerWatcher helps you stay informed about crucial changes such as container creation or termination, ensuring you are always aware of the state of your Docker environment.
+**Docker Watcher** is a monitoring solution written in Go, designed to track Docker events and notify system administrators in real-time. By leveraging Docker's event system, Docker Watcher helps you stay informed about crucial changes such as container creation or termination, ensuring you are always aware of the state of your Docker environment.
 
 ### Key Features
 
@@ -11,7 +11,7 @@
 
 ### Project Structure
 
-DockerWatcher consists of two main services:
+Docker Watcher consists of two main services:
 
 1. **Watcher Service:**
     - Collects and filters data from Docker's event system.
@@ -23,7 +23,7 @@ DockerWatcher consists of two main services:
 
 ### Running Modes
 
-DockerWatcher can be run in three different modes, providing flexibility based on your requirements:
+Docker Watcher can be run in three different modes, providing flexibility based on your requirements:
 
 1. **Watcher Mode:**
     - Collects data from Docker's event system and pushes it to Redis.
@@ -37,7 +37,7 @@ DockerWatcher can be run in three different modes, providing flexibility based o
     - Combines both watcher and notification functionalities.
     - Collects data and sends notifications in one go, simplifying the deployment.
 
-By using lists in Redis, DockerWatcher creates queues of messages, ensuring efficient and orderly processing of events.
+By using lists in Redis, Docker Watcher creates queues of messages, ensuring efficient and orderly processing of events.
 
 ### Notification Platforms
 
@@ -48,13 +48,13 @@ By using lists in Redis, DockerWatcher creates queues of messages, ensuring effi
 
 ### Motivation
 
-DockerWatcher was created to address the need for a reliable and efficient way to monitor Docker environments. By providing timely notifications about critical events, DockerWatcher helps system administrators maintain better control and oversight of their Docker containers, improving overall system reliability and responsiveness.
+Docker Watcher was created to address the need for a reliable and efficient way to monitor Docker environments. By providing timely notifications about critical events, Docker Watcher helps system administrators maintain better control and oversight of their Docker containers, improving overall system reliability and responsiveness.
 
 ## Usage
 
 ### Build from Source Code
 
-To build DockerWatcher from source, follow these steps:
+To build Docker Watcher from source, follow these steps:
 
 1. **Clone the Repository:**
     ```sh
@@ -69,7 +69,7 @@ To build DockerWatcher from source, follow these steps:
 
 ### Build with Docker
 
-To build DockerWatcher with docker, follow these steps:
+To build Docker Watcher with docker, follow these steps:
 
 1. **Clone the Repository:**
     ```sh
