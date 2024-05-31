@@ -135,7 +135,7 @@ A redis has to be in `dockerwatcher` network.
 
 ### Run with docker-compose (Recommended)
 
-If you have an existing redis, you can use `docker-compose.yml`. else you can use `docker-compose-full.yml` that has redis and DockerWatcher.
+If you have an existing redis, you can use `docker-compose.yml`. else you can use `docker-compose-full.yml` that has redis and Docker Watcher.
 
 #### Run multiple instances
 
