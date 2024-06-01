@@ -92,9 +92,10 @@ Also you can export these variables in the shell you use.
 
 | Key                      | Description               | Optional/Required |
 |--------------------------|---------------------------|-------------------|
-| REDIS_URL                |                           | Required                 |
-| REDIS_QUEUE_WRITE_NAME   |                           | Required                 |
-| REDIS_QUEUE_READ_NAMES   |                           | Required                 |
+| QUEUE_TYPE               | redis,dwqueue             | Required                 |
+| REDIS_URL                |                           | Required if qt=redis     |
+| REDIS_QUEUE_WRITE_NAME   |                           | Required if qt=redis     |
+| REDIS_QUEUE_READ_NAMES   |                           | Required if qt=redis     |
 | ENABLE_WATCHER           | 0 (disabled), 1 (enabled) | Required                 |
 | ENABLE_NOTIFICATION      | 0 (disabled), 1 (enabled) | Required                 |
 | GRACEFUL_SHUTDOWN_TIMEOUT| Integer (seconds)         | Required                 |
@@ -107,6 +108,7 @@ Also you can export these variables in the shell you use.
 | MATTERMOST_BEARER_AUTH   |                           | Required if np=mattermost|
 | MATTERMOST_CHANNEL_ID    |                           | Required if np=mattermost|
 
+*qt = QUEUE_TYPE
 *np = NOTIFICATION_PLATFORM
 
 for example, if you want to set NOTIFICATION_PLATFORM=telegram, TELEGRAM_BOT_API_TOKEN and TELEGRAM_CHAT_ID are necessary.

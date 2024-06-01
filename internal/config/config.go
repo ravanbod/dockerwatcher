@@ -13,11 +13,20 @@ import (
 
 type (
 	Config struct {
-		RedisURL                string
+		QueueConfig             QueueConfig
 		WatcherCfg              WatcherConfig
 		NotifCfg                NotifConfig
 		AppMode                 int
 		GracefulShutdownTimeout int64
+	}
+
+	QueueConfig struct {
+		QueueType   string
+		RedisConfig RedisConfig
+	}
+
+	RedisConfig struct {
+		RedisURL string
 	}
 
 	WatcherConfig struct {
@@ -108,8 +117,16 @@ func GetEnvConfig() (Config, error) {
 		return Config{}, errors.New("NOTIFICATION_PLATFORM must be set")
 	}
 
+	queueType := getEnvWithDefault("QUEUE_TYPE", "redis")
+	if queueType != "redis" && queueType != "dwqueue" {
+		return Config{}, errors.New("QUEUE_TYPE must be either redis or dwqueue")
+	}
+
 	return Config{
-		RedisURL: getEnvWithDefault("REDIS_URL", "redis://localhost:6379/0?protocol=3"),
+		QueueConfig: QueueConfig{QueueType: queueType,
+			RedisConfig: RedisConfig{
+				RedisURL: getEnvWithDefault("REDIS_URL", "redis://localhost:6379/0?protocol=3")},
+		},
 		WatcherCfg: WatcherConfig{
 			RedisQueueWriteName: getEnvWithDefault("REDIS_QUEUE_WRITE_NAME", "dockerwatcher"),
 			EventsFilter:        strings.Split(getEnvWithDefault("EVENTS_FILTER", ""), ","),
