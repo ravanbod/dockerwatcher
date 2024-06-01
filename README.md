@@ -5,7 +5,7 @@
 ### Key Features
 
 - **Event Monitoring:** Capture and filter events from Docker's event system.
-- **Multi-Platform Notifications:** Receive alerts on your preferred communication platforms, including Telegram (Supported), Mattermost (Supported), Generic webhook (Soon) and more (Soon).
+- **Multi-Platform Notifications:** Receive alerts on your preferred communication platforms, including Telegram (Supported), Mattermost (Supported), Generic webhook (Supported) and more (Soon).
 - **Scalable Architecture:** Designed with a modular approach to efficiently handle and process event data.
 - **Written in Go:** Utilizes the powerful and efficient Go programming language for high performance and reliability.
 
@@ -15,10 +15,10 @@ Docker Watcher consists of two main services:
 
 1. **Watcher Service:**
     - Collects and filters data from Docker's event system.
-    - Pushes the relevant event data to Redis for further processing.
+    - Pushes the relevant event data to the queue for further processing.
     
 2. **Notification Service:**
-    - Retrieves filtered event data from Redis.
+    - Retrieves filtered event data from the queue.
     - Sends notifications to users via the configured communication platforms.
 
 ### Running Modes
@@ -26,18 +26,18 @@ Docker Watcher consists of two main services:
 Docker Watcher can be run in three different modes, providing flexibility based on your requirements:
 
 1. **Watcher Mode:**
-    - Collects data from Docker's event system and pushes it to Redis.
+    - Collects data from Docker's event system and pushes it to the queue.
     - Ideal for distributed environments where multiple instances collect data from different Docker engines.
 
 2. **Notification Mode:**
-    - Retrieves data from Redis and sends notifications to users.
+    - Retrieves data from the queue and sends notifications to users.
     - Useful for centralizing the notification logic in a single service.
 
 3. **Watcher and Notification Mode:**
     - Combines both watcher and notification functionalities.
     - Collects data and sends notifications in one go, simplifying the deployment.
 
-By using lists in Redis, Docker Watcher creates queues of messages, ensuring efficient and orderly processing of events.
+By using lists in Redis, Docker Watcher creates queues of messages, ensuring efficient and orderly processing of events. (Also you can use dwqueue instead of redis!)
 
 ### Notification Platforms
 
@@ -111,11 +111,13 @@ Also you can export these variables in the shell you use.
 *qt = QUEUE_TYPE
 *np = NOTIFICATION_PLATFORM
 
-for example, if you want to set NOTIFICATION_PLATFORM=telegram, TELEGRAM_BOT_API_TOKEN and TELEGRAM_CHAT_ID are necessary.
+for example, if you want to set `NOTIFICATION_PLATFORM=telegram`, `TELEGRAM_BOT_API_TOKEN` and `TELEGRAM_CHAT_ID` are necessary.
 
 `REDIS_QUEUE_READ_NAMES` and `EVENTS_FILTER` are comma seperated. watch `.env.example`.
 
 for `EVENTS_FILTER`, see [this link](https://docs.docker.com/reference/cli/docker/system/events/#filter).
+
+if `QUEUE_TYPE` is `dwqueue`, `ENABLE_WATCHER` and `ENABLE_NOTIFICATION` must be `1`.
 
 ### Run without docker
 
@@ -142,6 +144,10 @@ If you have an existing redis, you can use `docker-compose.yml`. else you can us
 #### Run multiple instances
 
 It is recommended that launch a watcher service in every docker engine and use a shared Redis between them. And launch a Notification instance that sends Redis messages to your notification platform.
+
+### Run single instance without Redis
+
+We have a built-in queue system (a simple channel :) ) that you can use that instead of Redis. the point is that you can use dwqueue when `ENABLE_WATCHER` and `ENABLE_NOTIFICATION` are `1`.
 
 ## Messages
 You will get the messages in the markdown format. this is an example of dying mysql container.
