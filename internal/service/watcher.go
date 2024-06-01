@@ -9,22 +9,24 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	dockerClient "github.com/docker/docker/client"
-	"github.com/ravanbod/dockerwatcher/internal/repository/redis"
+	"github.com/ravanbod/dockerwatcher/internal/repository/queue"
 )
 
 type WatcherService struct {
-	dockerCli *dockerClient.Client
-	redisRepo redis.WatcherRedisRepo
+	dockerCli    *dockerClient.Client
+	msgQueue     queue.MessageQueue
+	queueName    string
+	eventFilters []string
 }
 
-func NewWatcherService(dockerCli *dockerClient.Client, redisRepo redis.WatcherRedisRepo) WatcherService {
-	return WatcherService{dockerCli: dockerCli, redisRepo: redisRepo}
+func NewWatcherService(dockerCli *dockerClient.Client, msgQueue queue.MessageQueue, queueName string, eventFilters []string) WatcherService {
+	return WatcherService{dockerCli: dockerCli, msgQueue: msgQueue, queueName: queueName, eventFilters: eventFilters}
 }
 
 // Blocking function! run it as a goroutine
-func (r *WatcherService) StartWatching(ctx context.Context, eventFilters []string) {
+func (r *WatcherService) StartWatching(ctx context.Context) {
 	filterArgs := filters.NewArgs()
-	for _, eventFilter := range eventFilters {
+	for _, eventFilter := range r.eventFilters {
 		if eventFilter == "" {
 			break
 		}
@@ -46,7 +48,7 @@ func (r *WatcherService) StartWatching(ctx context.Context, eventFilters []strin
 				break
 			}
 			slog.Info("Docker event", "event", string(jsonMsg))
-			err = r.redisRepo.PushMessageToQueue(ctx, string(jsonMsg))
+			err = r.msgQueue.PushMessageToQueue(ctx, r.queueName, string(jsonMsg))
 			if err != nil {
 				slog.Error("Error in pushing message to redis", "error", err)
 			}

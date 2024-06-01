@@ -12,7 +12,7 @@ import (
 	dockerClient "github.com/docker/docker/client"
 	"github.com/ravanbod/dockerwatcher/internal/config"
 	"github.com/ravanbod/dockerwatcher/internal/repository/notification"
-	"github.com/ravanbod/dockerwatcher/internal/repository/redis"
+	"github.com/ravanbod/dockerwatcher/internal/repository/queue"
 	"github.com/ravanbod/dockerwatcher/internal/service"
 	v9redis "github.com/redis/go-redis/v9"
 )
@@ -22,18 +22,15 @@ func main() {
 	defer stop()
 
 	appCfg, dockerCli, redisConn := initApp(ctx)
+	redisQueueRepo := queue.NewRedisRepo(redisConn)
 
 	if appCfg.AppMode&config.WatcherApp != 0 {
-		redisWatcherRepo := redis.NewWatcherRedisRepo(redisConn, appCfg.WatcherCfg.RedisQueueWriteName)
-		watcherService := service.NewWatcherService(dockerCli, redisWatcherRepo)
-
+		watcherService := service.NewWatcherService(dockerCli, redisQueueRepo, appCfg.WatcherCfg.RedisQueueWriteName, appCfg.WatcherCfg.EventsFilter)
 		slog.Info("Starting Watcher service ...")
-		go watcherService.StartWatching(ctx, appCfg.WatcherCfg.EventsFilter)
+		go watcherService.StartWatching(ctx)
 	}
 
 	if appCfg.AppMode&config.NotificationApp != 0 {
-		redisNotificationRepo := redis.NewNotificationRedisRepo(redisConn, appCfg.NotifCfg.RedisQueueReadNames)
-
 		var notifRepo notification.NotificationSender
 
 		if appCfg.NotifCfg.NotificationPlatform == "generic" {
@@ -46,7 +43,7 @@ func main() {
 			slog.Info("Preparing Mattermost Notification Service")
 			notifRepo, _ = notification.NewMattermostNotificationSender(appCfg.NotifCfg.MattermostConfig.Host, appCfg.NotifCfg.MattermostConfig.BearerAuth, appCfg.NotifCfg.MattermostConfig.ChannelId)
 		}
-		notificationService := service.NewNotificationService(redisNotificationRepo, notifRepo)
+		notificationService := service.NewNotificationService(redisQueueRepo, appCfg.NotifCfg.RedisQueueReadNames, notifRepo)
 		slog.Info("Starting Notification service ...")
 		go notificationService.StartListening(ctx)
 	}
@@ -88,7 +85,7 @@ func initApp(ctx context.Context) (appCfg config.Config, dockerCli *dockerClient
 	}
 
 	// Connect to the Redis
-	redisConn, err = redis.NewRedisClient(appCfg.RedisURL)
+	redisConn, err = queue.NewRedisClient(appCfg.RedisURL)
 
 	if err != nil {
 		slog.Error("Error in parsing the redis url", "error", err)
