@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"io"
-	"log/slog"
 	"net/http"
+	"strconv"
+	"time"
 )
 
 type telegramNotificationSender struct {
@@ -20,18 +20,17 @@ func NewTelegramNotificationSender(token string, charID int64) (NotificationSend
 
 func (r telegramNotificationSender) SendMessage(message string) error {
 	url := fmt.Sprintf("https://api.telegram.org/bot%s/%s", r.botToken, "sendMessage")
-	text := fmt.Sprintf("{\"chat_id\":%d, \"text\":\"%s\"}", r.chatID, message)
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer([]byte(text)))
+	jsonData := fmt.Sprintf("{\"chat_id\":%d, \"text\":\"%s\"}", r.chatID, message)
+
+	client := &http.Client{Timeout: time.Second * 5}
+	req, _ := http.NewRequest("POST", url, bytes.NewBuffer([]byte(jsonData)))
+	req.Header.Set("Content-Type", "application/json")
+	res, err := client.Do(req)
 	if err != nil {
 		return err
 	}
-	if resp.StatusCode != 200 {
-		respBody, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return err
-		}
-		slog.Error("Error from telegram", "error", respBody)
-		return errors.New("STATUS CODE IS NOT 200")
+	if res.StatusCode >= 400 {
+		err = errors.New("Status code is more than 399 error=" + strconv.Itoa(res.StatusCode))
 	}
-	return err
+	return nil
 }

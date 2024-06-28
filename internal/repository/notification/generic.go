@@ -2,10 +2,11 @@ package notification
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 type genericNotificationSender struct {
@@ -17,13 +18,15 @@ func NewGenericNotificationSender(url string) (NotificationSender, error) {
 }
 
 func (r genericNotificationSender) SendMessage(message string) error {
-	m := make(map[string]interface{}, 0)
-	m["message"] = message
-	jsonByte, err := json.Marshal(m)
+	jsonData := fmt.Sprintf("{\"message\":%s\"}", message)
+
+	client := &http.Client{Timeout: time.Second * 5}
+	req, _ := http.NewRequest("POST", r.url, bytes.NewBuffer([]byte(jsonData)))
+	req.Header.Set("Content-Type", "application/json")
+	res, err := client.Do(req)
 	if err != nil {
 		return err
 	}
-	res, err := http.Post(r.url, "application/json", bytes.NewBuffer(jsonByte))
 	if res.StatusCode >= 400 {
 		err = errors.New("Status code is more than 399 error=" + strconv.Itoa(res.StatusCode))
 	}
