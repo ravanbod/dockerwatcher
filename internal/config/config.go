@@ -122,6 +122,12 @@ func GetEnvConfig() (Config, error) {
 		return Config{}, errors.New("QUEUE_TYPE must be either redis or dwqueue")
 	}
 
+	redisQueueReadNames := strings.Split(getEnvWithDefault("REDIS_QUEUE_READ_NAMES", "dockerwatcher,watcherdocker"), ",")
+	if queueType == "dwqueue" { // Ignoring REDIS_QUEUE_READ_NAMES
+		redisQueueReadNames = make([]string, 1)
+		redisQueueReadNames[0] = "dwqueue"
+	}
+
 	return Config{
 		QueueConfig: QueueConfig{QueueType: queueType,
 			RedisConfig: RedisConfig{
@@ -132,7 +138,7 @@ func GetEnvConfig() (Config, error) {
 			EventsFilter:        strings.Split(getEnvWithDefault("EVENTS_FILTER", ""), ","),
 		},
 		NotifCfg: NotifConfig{
-			RedisQueueReadNames:  strings.Split(getEnvWithDefault("REDIS_QUEUE_READ_NAMES", "dockerwatcher,watcherdocker"), ","),
+			RedisQueueReadNames:  redisQueueReadNames,
 			NotificationPlatform: getEnvWithDefault("NOTIFICATION_PLATFORM", "telegram"),
 			TelegramConfig:       TelegramConfig{TelegramBotApiToken: getEnvWithDefault("TELEGRAM_BOT_API_TOKEN", "xxxx"), TelegramChatID: int64(telegramChatID)},
 			GenericNotifConfig:   GenericNotifConfig{Url: genericNotifUrl},

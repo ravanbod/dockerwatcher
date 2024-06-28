@@ -28,7 +28,7 @@ func (r *NotificationService) StartListening(ctx context.Context) {
 
 		data, err := r.msgQueue.GetLastMessageFromQueue(ctx, r.queueNames[qi])
 		if err == nil { // data available
-			slog.Info("Reading nth queue", "n", qi, "data", data)
+			slog.Info("Reading queue", "name", r.queueNames[qi], "data", data)
 			messageText, err := jsontomd.ConvertJsonToMD(data)
 			if err != nil {
 				slog.Error("Failed to convert message to md...converting to tree", "error", err)
@@ -43,7 +43,7 @@ func (r *NotificationService) StartListening(ctx context.Context) {
 			}
 		}
 		select {
-		case <-time.After(time.Microsecond * 1000):
+		case <-time.After(time.Second * 1):
 			queueIndex++
 		case <-ctx.Done():
 			slog.Info("Exiting Notification service ...")
