@@ -6,6 +6,6 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-RUN go build -o dockerwatcher cmd/dockerwatcher/main.go
+RUN go build -o build/dockerwatcher cmd/dockerwatcher/main.go
 
-CMD ["./dockerwatcher"]
+CMD ["./build/dockerwatcher"]
