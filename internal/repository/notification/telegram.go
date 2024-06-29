@@ -32,5 +32,5 @@ func (r telegramNotificationSender) SendMessage(message string) error {
 	if res.StatusCode >= 400 {
 		err = errors.New("Status code is more than 399 error=" + strconv.Itoa(res.StatusCode))
 	}
-	return nil
+	return err
 }
