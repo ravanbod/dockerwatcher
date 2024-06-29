@@ -79,7 +79,7 @@ To build Docker Watcher with docker, follow these steps:
 
 2. **Build the Project:**
     ```sh
-    docker build -t dockerwatcher .
+    docker build -t dockerwatcher:$(git describe --exact-match --tags 2> /dev/null || git rev-parse --short HEAD) .
     ```
 
 ## How to run

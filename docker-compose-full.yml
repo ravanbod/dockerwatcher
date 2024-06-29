@@ -3,7 +3,7 @@
 version: "3"
 services:
   dockerwatcher:
-    build: .
+    image: behradrvb/dockerwatcher:latest
     env_file:
     - .env
     volumes:
