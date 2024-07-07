@@ -79,7 +79,7 @@ To build DockerWatcher with docker, follow these steps:
 
 2. **Build the Project:**
     ```sh
-    docker build -t dockerwatcher:$(git describe --exact-match --tags 2> /dev/null || git rev-parse --short HEAD) .
+    docker build -t dockerwatcher:$(git describe --exact-match --tags 2> /dev/null || git rev-parse --short HEAD) -t dockerwatcher:latest .
     ```
 
 ## How to run
@@ -90,8 +90,8 @@ please see `.env.example` file. create another file like this and name it `.env`
 
 Also you can export these variables in the shell you use.
 
-| Key                      | Description               | Optional/Required |
-|--------------------------|---------------------------|-------------------|
+| Key                      | Description               | Optional/Required        |
+|--------------------------|---------------------------|--------------------------|
 | QUEUE_TYPE               | redis,dwqueue             | Required                 |
 | REDIS_URL                |                           | Required if qt=redis     |
 | REDIS_QUEUE_WRITE_NAME   |                           | Required if qt=redis     |
